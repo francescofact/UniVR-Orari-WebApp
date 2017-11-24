@@ -1,0 +1,75 @@
+<!-- 
+// The MIT License (MIT)
+// 
+// Copyright (c) 2017-2018 Francesco Fattori <ffattori@me.com>
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+// documentation files (the "Software"), to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
+// to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions
+// of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+// BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<html manifest="cache.manifest">
+  <meta name="viewport" content="width=device-width"  user-scalable="no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="apple-touch-icon" href="icon512.png">
+  <head>
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <title>Univr Orari</title>
+    <script>
+
+
+
+      $(document).ready(function(){
+        $(".tutorial").hide();
+        checkDevice();
+      });
+
+      function checkDevice(){
+        if (window.navigator.standalone){
+            //ok, webapp installata
+            window.location.href = "calendar.html";
+        } else {
+          if (iOS()){
+            //ha iOS, ma non mi ha ancora installata
+            $(".tutorial").show();
+          } else {
+            window.location.href = "calendar.html";
+          }
+        }
+      }
+
+      function iOS() {
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+          return true;
+        }
+        return false;
+      }
+    </script>
+  </head>
+  <body>
+    <div data-role="header" data-position="fixed">
+      <h1>Univr OrariApp</h1>
+    </div>
+    <div class="tutorial" align="center">
+      <h2>Sembra che tu non abbia installato l'app sul tuo telefono.</h2></br>
+      La procedura non &#232; complicata!</br></br>
+      Premi il tasto <b>Condividi</b> sotto al centro</br></br>
+      <img src="share.png" height="50"></img></br></br>
+      Poi "<b>Aggiungi a Home</b>" ed infine "<b>Aggiungi</b>"</br></br>
+      <img src="addhome.png" height="150"></img></br>
+    </div>
+  </body>
+</html>

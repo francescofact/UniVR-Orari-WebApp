@@ -1,0 +1,275 @@
+<html manifest="cache.manifest">
+<meta name="viewport" content="width=device-width"  user-scalable="no">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <head>
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <script>
+     var editormode = false;
+     var notloaded = false;
+
+      $(document).ready(function(){
+        updateYear();
+        displayInfo();
+        $(".editor").hide();
+
+        if (localStorage.getItem("cognomiArray") !== null){
+          document.getElementById("removeClasse").style.visibility = "visible";
+        } else {
+          document.getElementById("removeClasse").style.visibility = "hidden";
+
+        }
+      });
+
+      function updateCourse(){
+        //pulisco gli input sotto
+        $('select[id="course"]').empty();
+        $('select[id="year2"]').empty();
+
+        //comincio a chiedere
+        var selected = document.getElementById("year");
+        $(function() {
+              $.ajax({
+                 url: 'http://westcost0.altervista.org/orari/api.php?w=getcourses&year=' + selected.value,
+                 async: false,
+                 error: function(error){
+                   if (editormode == true){
+                     alert("Impossibile recuperare i dati. Riprova più tardi.");
+                     editormode = true;
+                     goBack();
+                   }
+
+                   notloaded = true;
+                 },
+                 success: function(result){
+                    var options = $('select[id="course"]');
+                    var elenco_corsi = JSON.parse(result);
+                    //JSON to Array
+                    var arr = [];
+                    for(var x in elenco_corsi){
+                      arr.push(elenco_corsi[x]);
+                    }
+
+                    options.empty();
+                    options.append(new Option("--", ""))
+                    for(var i=0; i!=arr.length; i++){
+                      options.append(new Option(arr[i][0], arr[i][1]))
+                    }
+
+                    options.selectmenu("refresh");
+                 }
+              });
+          });
+      }
+
+      function updateYear2(){
+        //pulisco gli input sotto
+        $('select[id="year2"]').empty();
+
+        //comincio a chiedere
+        var selected = document.getElementById("year");
+        var selected2 = document.getElementById("course");
+        $(function() {
+              $.ajax({
+                 url: 'http://westcost0.altervista.org/orari/api.php?w=getyears2&year=' + selected.value + '&course=' + selected2.value,
+                 async: false,
+                 error: function(error){
+                   if (editormode == true){
+                     alert("Impossibile recuperare i dati. Riprova più tardi.");
+                     editormode = true;
+                     goBack();
+                   }
+
+                   notloaded = true;
+                 },
+                 success: function(result){
+                    var options = $('select[id="year2"]');
+                    var elenco_corsi = JSON.parse(result);
+                    //JSON to Array
+                    var arr = [];
+                    for(var x in elenco_corsi){
+                      arr.push(elenco_corsi[x]);
+                    }
+
+                    options.empty();
+                    options.append(new Option("--", ""))
+                    for(var i=0; i!=arr.length; i++){
+                      options.append(new Option(arr[i][0], arr[i][1]))
+                    }
+
+                    options.selectmenu("refresh");
+                    notloaded = false;
+                 }
+              });
+          });
+      }
+
+
+      function updateYear(){
+        $(function() {
+              $.ajax({
+                 url: 'http://westcost0.altervista.org/orari/api.php?w=getyears',
+                 async: false,
+                 error: function(error){
+                   if (editormode == true){
+                     alert("Impossibile recuperare i dati. Riprova più tardi.");
+                     editormode = true;
+                     goBack();
+                   }
+
+                   notloaded = true;
+                 },
+                 success: function(result){
+                    var options = $('select[id="year"]');
+                    var elenco_anni = JSON.parse(result);
+                    //JSON to Array
+                    var arr = [];
+                    for(var x in elenco_anni){
+                      arr.push(elenco_anni[x]);
+                    }
+
+                    options.empty();
+                    options.append(new Option("--", ""))
+                    for(var i=0; i!=arr.length; i++){
+                      options.append(new Option(arr[i][0], arr[i][1]))
+                    }
+
+                    options.selectmenu("refresh");
+                 }
+              });
+          });
+      }
+
+      function saveData(){
+        localStorage.setItem("year", document.getElementById("year").value);
+        localStorage.setItem("course", document.getElementById("course").value);
+        localStorage.setItem("year2", document.getElementById("year2").value);
+        localStorage.setItem("year_hr", $("#year option:selected").text());
+        localStorage.setItem("course_hr", $("#course option:selected").text());
+        localStorage.setItem("year2_hr", $("#year2 option:selected").text());
+        editormode = false;
+        window.location.href = "calendar.html#saved";
+      }
+
+      function displayInfo(){
+        var course = localStorage.getItem("course")
+        var year = localStorage.getItem("year")
+        var year2 = localStorage.getItem("year2")
+        var course_hr = localStorage.getItem("course_hr")
+        var year_hr = localStorage.getItem("year_hr")
+        var year2_hr = localStorage.getItem("year2_hr")
+
+        if (year_hr != "" && course_hr != "" && year2_hr != "" && year_hr != null && course_hr != null && year2_hr != null){
+          document.getElementById("display_year").innerHTML = year_hr;
+          document.getElementById("display_course").innerHTML = course_hr;
+          document.getElementById("display_year2").innerHTML = year2_hr;
+        }
+      }
+
+      function editmyinfo(){
+        if (navigator.onLine){
+          if (notloaded == true){
+            updateYear();
+            alert("Quando avevi caricato la pagina non avevi una connessione ad internet. Tranquillo, abbiamo scaricato tutto quello che serve. Ripremi se vuoi modificare le tue info. :)");
+            notloaded = false;
+          } else {
+            editormode = true;
+            var course = localStorage.getItem("course")
+            var year = localStorage.getItem("year")
+            var year2 = localStorage.getItem("year2")
+
+            document.getElementById('year').value = year;
+            $('select[id="year"]').selectmenu("refresh");
+            updateCourse();
+            document.getElementById('course').value = course;
+            $('select[id="course"]').selectmenu("refresh");
+            updateYear2();
+            document.getElementById("year2").value = year2;
+            $('select[id="year2"]').selectmenu("refresh");
+
+            document.getElementById("backButton").classList.remove("ui-icon-back");
+            document.getElementById("backButton").classList.add("ui-icon-delete");
+            document.getElementById("backButton").innerHTML = "Annulla";
+            $(".profile").hide();
+            $(".editor").show();
+          }
+        } else {
+          alert("Devi essere connesso ad internet per effetturare questa modifica.");
+        }
+
+      }
+
+      function goBack(){
+        if (editormode == true){
+          $(".editor").hide();
+          $(".profile").show();
+          editormode = false;
+          document.getElementById("backButton").classList.remove("ui-icon-delete");
+          document.getElementById("backButton").classList.add("ui-icon-back");
+          document.getElementById("backButton").innerHTML = "Indietro";
+        } else {
+          window.location.href = "calendar.html";
+        }
+      }
+
+
+
+      // Check if a new cache is available on page load.
+      window.addEventListener('load', function(e) {
+        window.applicationCache.addEventListener('updateready', function(e) {
+          if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+            // Browser downloaded a new app cache.
+            alert("Aggiornamento dell'app disponibile. Verrà ricaricata la pagina")
+              window.location.reload(true);
+          }
+        }, false);
+
+      }, false);
+
+      function removeClasse(){
+        localStorage.removeItem("cognomiArray");
+        localStorage.removeItem("myclass");
+        alert("E' stato rimosso il filtro per classe");
+        window.location.reload(true);
+      }
+    </script>
+  </head>
+  <body>
+    <div data-role="header" data-position="fixed">
+    <a href="" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-left ui-icon-back" id="backButton" onclick="goBack();">Indietro</a>
+    <h1>Impostazioni</h1>
+        <button class="ui-btn-right ui-btn ui-btn-b ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-check editor" onclick="saveData();">Salva</button>
+    </div>
+    </br>
+    <div align="center" class="profile">
+    <h2 align="center">Le tue informazioni</h2>
+    <img src="user.png" width="100"></img></br></br>
+    <b>Anno Accademico:</b></br><span id="display_year"><i>Nessuno</i></span></br>
+    <b>Corso:</b></br><span id="display_course"><i>Nessuno</i></span></br>
+    <b>Anno di Studio:</b></br><span id="display_year2"><i>Nessuno</i></span></br></br>
+    <button onclick="editmyinfo();" href="#">Modifica</button>
+    <button onclick="removeClasse();" id="removeClasse" href="#">Rimuovi Selezione Classe</button></br></br></br></br>
+    Sviluppato da Francesco Fattori</br>
+
+
+    <script type="text/javascript">
+    /* <![CDATA[ */
+    document.write('<s'+'cript type="text/javascript" src="//ad.altervista.org/js2.ad/size=468X60/?ref='+encodeURIComponent(location.hostname+location.pathname)+'&r='+new Date().getTime()+'"></s'+'cript>');
+    /* ]]> */
+    </script>
+
+
+    </div>
+    <div class="editor" align="center">
+      <h2 align="center">Modifica informazioni</h2>
+      <img src="edit.png" width="100"></img></br></br>
+      <form>
+          Anno Accademico: <select id="year" onchange="updateCourse();"><option value="loading">Loading...</option></select></br>
+          Nome Corso: <select id="course" onchange="updateYear2();"/></select></br>
+          Anno di Studio: <select id="year2"></select></br>
+          <p align="center"><i>premi il pulsante in alto per salvare</i></p>
+      </form>
+    </div>
+  </body>
+</html>

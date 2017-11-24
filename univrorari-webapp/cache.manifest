@@ -1,0 +1,21 @@
+CACHE MANIFEST
+# v14.5.1   21-11-2017
+
+CACHE:
+index.html
+calendar.html
+settings.html
+css/jquery.mobile-1.4.5.min.css
+js/jquery.mobile-1.4.5.min.js
+js/jquery-1.11.1.min.js
+offline.html
+icon512.png
+user.png
+edit.png
+css/images/ajax-loader.gif
+
+NETWORK:
+*
+
+FALLBACK:
+offline.html

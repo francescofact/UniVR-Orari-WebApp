@@ -1,0 +1,393 @@
+<html manifest="cache.manifest">
+<meta name="viewport" content="width=device-width" user-scalable="no">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <head>
+
+    <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
+    <script src="js/jquery-1.11.1.min.js"></script>
+    <script src="js/jquery.mobile-1.4.5.min.js"></script>
+
+    <style>
+      .left {
+        float: left;
+      }
+
+      .right {
+        float: right;
+      }
+    </style>
+    <script>
+
+
+      var debugJSON;
+      var debugarr = new Array();
+      var daydate = new Date();
+      var nDay = daydate.getDay();
+      var checkClassDone = false;
+
+      $(document).ready(function(){
+        getData();
+      });
+
+      function getData(offline){
+        document.getElementById("goback").style.visibility = 'hidden';
+        document.getElementById("status").style.visibility = 'hidden';
+        var course = localStorage.getItem("course");
+        var year = localStorage.getItem("year");
+        var year2 = localStorage.getItem("year2");
+
+        document.getElementById("title_wow").innerHTML = "&nbsp; &nbsp; Oggi";
+
+        if (course != null && year != null && year2 != null){
+          if (offline == "true"){
+            displayDate(localStorage.getItem("weektimetable"));
+          } else {
+            $(function() {
+                  $.ajax({
+                     url: 'http://westcost0.altervista.org/orari/api.php?w=getweek&c=' + course +'&a=' + year + '&a2=' + year2,
+                     cache: false,
+                     async: false,
+                     error: function(err){
+                        fetchFailed("getData");
+                     },
+                     success: function(result){
+                       localStorage.setItem("weektimetable", result);
+                       localStorage.setItem("weekstart", getMonday());
+                       displayDate(result);
+                    }
+                });
+            });
+          }
+
+        } else {
+          $(".lista").append("<li class='ui-li-static ui-body-inherit ui-last-child'></br><h3 align='center'>Nessun corso impostato</h3></br></li></br><p align='center'><i>Vai nelle impostazioni dell'app per impostare il tuo corso</i></p>");
+          document.getElementById("status").style.visibility = 'hidden';
+        }
+
+      }
+
+      function loadWeek(offline){
+        document.getElementById("goback").style.visibility = 'visible';
+
+        document.getElementById("status").style.visibility = 'hidden';
+        var course = localStorage.getItem("course");
+        var year = localStorage.getItem("year");
+        var year2 = localStorage.getItem("year2");
+
+        $(".lista").empty();
+
+        document.getElementById("title_wow").innerHTML = "&nbsp; &nbsp; Questa Settimana";
+
+        if (course != null && year != null && year2 != null){
+          if (offline == "true"){
+              displayWeek(localStorage.getItem("weektimetable"));
+          } else {
+            $(function() {
+                  $.ajax({
+                     url: 'http://westcost0.altervista.org/orari/api.php?w=getweek&c=' + course +'&a=' + year + '&a2=' + year2,
+                     async: false,
+                     error: function(error){
+                       fetchFailed("loadWeek");
+                     },
+                     success: function(result){
+                       displayWeek(result);
+                    }
+                });
+            });
+          }
+        } else {
+          $(".lista").append("<li class='ui-li-static ui-body-inherit ui-last-child'></br><h3 align='center'>Nessun corso impostato</h3></br></li></br><p align='center'><i>Vai nelle impostazioni dell'app per impostare il tuo corso</i></p>");
+          document.getElementById("status").style.visibility = 'hidden';
+        }
+        //document.getElementById("status").style.visibility = 'hidden';
+      }
+
+      function getDate(){
+        data = new Date();
+        return BeautifulDate(data.getDay(), data.getMonth(), data.getDate(), data.getFullYear());
+      }
+
+      function BeautifulDate(giorno, mese, date, year){
+        //giorno 0-6 , mese 0-11 , date 0-31, year
+
+        if(giorno == 0) giorno = "Domenica";
+        if(giorno == 1) giorno = "Lunedì";
+        if(giorno == 2) giorno = "Martedì";
+        if(giorno == 3) giorno = "Mercoledì";
+        if(giorno == 4) giorno = "Giovedì";
+        if(giorno == 5) giorno = "Venerdì";
+        if(giorno == 6) giorno = "Sabato";
+
+        if(mese == 0) mese = "Gennaio";
+        if(mese == 1) mese = "Febbraio";
+        if(mese == 2) mese = "Marzo";
+        if(mese == 3) mese = "Aprile";
+        if(mese == 4) mese = "Maggio";
+        if(mese == 5) mese = "Giugno";
+        if(mese == 6) mese = "Luglio";
+        if(mese == 7) mese = "Agosto";
+        if(mese == 8) mese = "Settembre";
+        if(mese == 9) mese = "Ottobre";
+        if(mese == 10) mese = "Novembre";
+        if(mese == 11) mese = "Dicembre";
+
+        return(giorno+" "+date+" "+mese+" "+year);
+        //-->
+      }
+
+      function getMonday() {
+        var d = new Date();
+        var day = d.getDay(),
+            diff = d.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
+        var monday = Date(d.setDate(diff));
+        var risposta = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear(); //mm-dd-yyyy
+        return risposta;
+      }
+
+      function fetchFailed(from){
+        var weektimetable = localStorage.getItem("weektimetable");
+        var weekstart = localStorage.getItem("weekstart");
+
+          if (weektimetable != null && weektimetable != ""){
+            weekstart = new Date(weekstart);
+            weekstart = weekstart.getDate();
+            if ((weekstart + 6) >= daydate.getDate() && weekstart <= daydate.getDate()){
+              //timetable ancora valida!
+              if (from == "getData"){
+                getData("true");
+              } else if (from == "loadWeek"){
+                loadWeek("true");
+              }
+            } else {
+              console.log((weekstart + 6) + " <= " + daydate.getDate + " AND " + weekstart + " <= " + daydate.getDate());
+              document.getElementById("status").style.visibility = 'visible';
+              document.getElementById("status").innerHTML = 'Impossibile Aggiornare i Dati   <a onclick="getData();">Riprova</a>';
+            }
+          }
+
+      }
+
+      function displayDate(result){
+
+
+
+        $(".lista").append("<li data-role='list-divider' role='heading' class='ui-li-divider ui-bar-b ui-first-child ui-last-child'>" + getDate() +"</li>");
+
+        var lezioni = JSON.parse(result);
+        //JSON to Array
+        var arr = [];
+        for(var x in lezioni){
+          arr.push(lezioni[x]);
+        }
+
+        if (arr.length == 0){
+          $(".lista").append("<li class='ui-li-static ui-body-inherit ui-last-child'> </br><h3 align='center'>Oggi non hai nessuna lezione</h3> </br></li> <p align='center'><a onclick='loadWeek();'>Carica tutta la settimana</a></p>");
+        } else {
+
+          //ordino per ora le lezioni
+          arr.sort(function(a,b){
+            a = new Date('10/10/10 '+a[2]);
+            b = new Date('10/10/10 '+b [2]);
+            return a<b?-1:a>b?1:0;
+          });
+
+          //ottengo giorno della settimana
+
+          for(var i=0; i!=arr.length; i++){
+            //array($cella["nome_insegnamento"], $cella["aula"], $cella["ora_inizio"], $cella["ora_fine"], $cella["docente"]);
+            //debug variabili
+            debugarr.push(arr[i]);
+
+            if (arr[i][5] == nDay){
+              //controllo se è di un altro Gruppo
+              if (localStorage.getItem("cognomiArray") !== null){
+
+                var cognomiArray = JSON.parse(localStorage.getItem("cognomiArray"));
+                var myclass = localStorage.getItem("myclass");
+                var isThere = false;
+
+                for (var y = 0; y != cognomiArray.length; y++){
+                  if(arr[i][0].indexOf(cognomiArray[y]) !== -1){
+                    isThere = true;
+                  }
+                }
+                if (isThere === false){
+                  $(".lista").append(" <li class='ui-li-static ui-body-inherit ui-last-child'> <h3>" + arr[i][0].replace(myclass, "") + "</h3> <p><strong>Aula: </strong>" + arr[i][1] + "</p> <p>" + arr[i][4] + "</p>   <p class='ui-li-aside'><strong>" + arr[i][2] + "-" + arr[i][3] + "</strong></p> </li>")
+                }
+              } else {
+                $(".lista").append(" <li class='ui-li-static ui-body-inherit ui-last-child'> <h3>" + arr[i][0] + "</h3> <p><strong>Aula: </strong>" + arr[i][1] + "</p> <p>" + arr[i][4] + "</p>   <p class='ui-li-aside'><strong>" + arr[i][2] + "-" + arr[i][3] + "</strong></p> </li>")
+              }
+            }
+          }
+
+          $(".lista").append("<p align='center'><a onclick='loadWeek();'>Carica tutta la settimana</a></p>");
+        }
+        document.getElementById("status").style.visibility = 'hidden';
+
+        //controllo classi divise per cognomi
+        checkSplittedClass(result);
+        debugJSON = result;
+      }
+
+
+      function displayWeek(result){
+        var lezioni = JSON.parse(result);
+        //JSON to Array
+        var arr = [];
+        for(var x in lezioni){
+          arr.push(lezioni[x]);
+        }
+
+        $(".lista").empty();
+        if (arr.length == 0){
+          $(".lista").append("<li class='ui-li-static ui-body-inherit ui-last-child'> </br><h3 align='center'>Questa settimana non hai nessuna lezione</h3> </br></li> <p align='center'><a onclick='loadWeek();'>Carica tutta la settimana</a></p>");
+        } else {
+
+          //ordino per ora le lezioni
+          arr.sort(function(a,b){
+            a = new Date('10/10/10 '+a[2]);
+            b = new Date('10/10/10 '+b [2]);
+            return a<b?-1:a>b?1:0;
+          });
+
+          for (var j=nDay; j != 7; j++){
+
+            var questogiorno = new Date(getMonday());
+            questogiorno.setDate(questogiorno.getDate() + j - 1);
+            questogiorno = BeautifulDate(questogiorno.getDay(), questogiorno.getMonth(), questogiorno.getDate(), questogiorno.getFullYear());
+
+            $(".lista").append("<li data-role='list-divider' role='heading' class='ui-li-divider ui-bar-b ui-first-child ui-last-child'>" + questogiorno +"</li>");
+
+            for(var i=0; i!=arr.length; i++){
+              //array($cella["nome_insegnamento"], $cella["aula"], $cella["ora_inizio"], $cella["ora_fine"], $cella["docente"]);
+              if (arr[i][5] == j){
+                //controllo se è di un altro Gruppo
+                  if (localStorage.getItem("cognomiArray") !== null){
+
+                    var cognomiArray = JSON.parse(localStorage.getItem("cognomiArray"));
+                    var myclass = localStorage.getItem("myclass");
+                    var isThere = false;
+
+                    for (var y = 0; y != cognomiArray.length; y++){
+                      if(arr[i][0].indexOf(cognomiArray[y]) !== -1){
+                        isThere = true;
+                      }
+                    }
+
+                    if (isThere === false){
+                      $(".lista").append(" <li class='ui-li-static ui-body-inherit ui-last-child'> <h3>" + arr[i][0].replace(myclass, "") + "</h3> <p><strong>Aula: </strong>" + arr[i][1] + "</p> <p>" + arr[i][4] + "</p>   <p class='ui-li-aside'><strong>" + arr[i][2] + "-" + arr[i][3] + "</strong></p> </li>")
+
+                    }
+                  } else {
+                    $(".lista").append(" <li class='ui-li-static ui-body-inherit ui-last-child'> <h3>" + arr[i][0] + "</h3> <p><strong>Aula: </strong>" + arr[i][1] + "</p> <p>" + arr[i][4] + "</p>   <p class='ui-li-aside'><strong>" + arr[i][2] + "-" + arr[i][3] + "</strong></p> </li>")
+                  }
+              }
+            }
+          }
+        }
+
+      document.getElementById("status").style.visibility = 'hidden';
+      //controllo classi divise per cognomi
+      checkSplittedClass(result);
+      }
+
+
+
+            // Check if a new cache is available on page load.
+      window.addEventListener('load', function(e) {
+        window.applicationCache.addEventListener('updateready', function(e) {
+          if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+            // Browser downloaded a new app cache.
+            alert("Aggiornamento dell'app disponibile. Verrà ricaricata la pagina")
+              window.location.reload(true);
+          }
+        }, false);
+
+      }, false);
+
+
+      function checkSplittedClass(json){
+        if(json.indexOf("[cognomi ") !== -1 && localStorage.getItem("cognomiArray") == null){
+          var regex = /\[cognomi (.*?)\]/g;
+          var matches = json.match(regex);
+          var cognomiArray = new Array();
+
+          if (matches){
+
+            for(var x = 0; x != (matches.length); x++){
+              var submatch = matches[x];
+              if ($.inArray(submatch, cognomiArray) == -1){
+                cognomiArray.push(submatch);
+                $(".cognomechoice").append('<a onclick="setCognome(\'' + submatch + '\')" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-b" data-rel="back" data-transition="flow">' + submatch + '</a>');
+              }
+            }
+
+          } else {
+            console.log("no matches");
+          }
+
+          localStorage.setItem("cognomiArray", JSON.stringify(cognomiArray));
+          document.getElementById("cognomebutton").style.display = "block";
+          checkClassDone = true;
+        }
+      }
+
+
+
+      function setCognome(my){
+        var all = JSON.parse(localStorage.getItem("cognomiArray"));
+        //tolgo il mio nome dalla lista
+
+        for(var i = all.length - 1; i >= 0; i--) {
+          if(all[i] === my) {
+             all.splice(i, 1);
+          }
+        }
+
+        localStorage.setItem("cognomiArray", JSON.stringify(all));
+        localStorage.setItem("myclass", my);
+        document.getElementById("cognomebutton").style.display = "hidden";
+        $("#cognomebutton").hide();
+        goBack();
+      }
+
+
+      function goBack(){
+        $(".lista").empty();
+        getData();
+
+      }
+    </script>
+  </head>
+  <body>
+
+    <div data-role="header" data-position="fixed">
+      <a href="" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-left ui-icon-back" id="goback" onclick="goBack();">Indietro</a>
+    <h1>Univr OrariApp</h1>
+        <a onclick="window.location.href = 'settings.html';" data-ajax="false" class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-gear">&nbsp;</a>
+    </div>
+    <div data-role="collapsibleset" data-theme="a" data-inset="false">
+
+        <h2 class="left" id="title_wow">&nbsp; &nbsp; Oggi</h2> </h2></br></br></br></br>
+        <a href="#popupDialog" style="display:none" id="cognomebutton" data-rel="popup" data-position-to="window" data-transition="pop" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-delete ui-btn-icon-left ui-btn-b">Seleziona Gruppo</a>
+        <div data-role='list-divider' id="status" role='heading' class='ui-bar-b-yellow'>&nbsp; &nbsp;Caricamento... </div>
+            <ul data-role="listview" data-theme="a" data-divider-theme="b" class="lista">
+
+            </ul>
+
+    </div>
+
+    <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+        <div data-role="header" data-theme="a">
+        <h1>Avviso</h1>
+        </div>
+        <div role="main" class="ui-content">
+            <h3 align="center" class="ui-title">Di che gruppo fai parte?</h3>
+            <p align="center">Ho notato che le tue lezioni sono suddivise in più gruppi. Seleziona il gruppo a cui appartieni. (puoi dimenticare questa scelta in seguito dalle impostazioni)</p>
+            <div class="cognomechoice">
+
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
