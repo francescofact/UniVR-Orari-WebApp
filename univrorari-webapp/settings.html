@@ -8,7 +8,7 @@
     <script>
      var editormode = false;
      var notloaded = false;
-
+     var courses = "";
       $(document).ready(function(){
         updateYear();
         displayInfo();
@@ -39,12 +39,12 @@
                      editormode = true;
                      goBack();
                    }
-
                    notloaded = true;
                  },
                  success: function(result){
                     var options = $('select[id="course"]');
                     var elenco_corsi = JSON.parse(result);
+                    courses = elenco_corsi;
                     //JSON to Array
                     var arr = [];
                     for(var x in elenco_corsi){
@@ -70,41 +70,24 @@
         //comincio a chiedere
         var selected = document.getElementById("year");
         var selected2 = document.getElementById("course");
-        $(function() {
-              $.ajax({
-                 url: 'http://westcost0.altervista.org/orari/api.php?w=getyears2&year=' + selected.value + '&course=' + selected2.value,
-                 async: false,
-                 error: function(error){
-                   if (editormode == true){
-                     alert("Impossibile recuperare i dati. Riprova più tardi.");
-                     editormode = true;
-                     goBack();
-                   }
 
-                   notloaded = true;
-                 },
-                 success: function(result){
-                    var options = $('select[id="year2"]');
-                    var elenco_corsi = JSON.parse(result);
-                    //JSON to Array
-                    var arr = [];
-                    for(var x in elenco_corsi){
-                      arr.push(elenco_corsi[x]);
-                    }
+        var options = $('select[id="year2"]');
+        var elenco_corsi = courses;
 
-                    options.empty();
-                    options.append(new Option("--", ""))
-                    for(var i=0; i!=arr.length; i++){
-                      options.append(new Option(arr[i][0], arr[i][1]))
-                    }
+        options.empty();
+        options.append(new Option("--", ""))
+        for(var i=0; i<courses.length; i++){
+          if (courses[i][1] == selected2.value){
+            for(var j=0; j<courses[i][2].length; j++){
+              options.append(new Option(courses[i][2][j]["label"], courses[i][2][j]["valore"]))
+            }
+          }
+        }
 
-                    options.selectmenu("refresh");
-                    notloaded = false;
-                 }
-              });
-          });
+        options.selectmenu("refresh");
+        notloaded = false;
+
       }
-
 
       function updateYear(){
         $(function() {
@@ -251,15 +234,6 @@
     <button onclick="editmyinfo();" href="#">Modifica</button>
     <button onclick="removeClasse();" id="removeClasse" href="#">Rimuovi Selezione Classe</button></br></br></br></br>
     Sviluppato da Francesco Fattori</br>
-
-
-    <script type="text/javascript">
-    /* <![CDATA[ */
-    document.write('<s'+'cript type="text/javascript" src="//ad.altervista.org/js2.ad/size=468X60/?ref='+encodeURIComponent(location.hostname+location.pathname)+'&r='+new Date().getTime()+'"></s'+'cript>');
-    /* ]]> */
-    </script>
-
-
     </div>
     <div class="editor" align="center">
       <h2 align="center">Modifica informazioni</h2>

@@ -1,11 +1,21 @@
-<html manifest="cache.manifest">
-<meta name="viewport" content="width=device-width" user-scalable="no">
+<html manifest="cache.manifest?v=15.2.1">
+<meta name="viewport" content="width=device-width, viewport-fit=cover" user-scalable="no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <head>
 
     <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css" />
     <script src="js/jquery-1.11.1.min.js"></script>
     <script src="js/jquery.mobile-1.4.5.min.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-125796297-2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-125796297-2');
+    </script>
 
     <style>
       .left {
@@ -15,18 +25,32 @@
       .right {
         float: right;
       }
+
+      .navbar {
+      	margin-top: 15px;
+      }
+
+      .right-btn-right {
+        position: absolute !important;
+        bottom: 0em !important;
+        right: .4em;
+      }
+
+      .left-btn-left {
+        position: absolute !important;
+        bottom:0em !important;
+        left: .4em;
+      }
     </style>
     <script>
-
-
-      var debugJSON;
-      var debugarr = new Array();
       var daydate = new Date();
       var nDay = daydate.getDay();
       var checkClassDone = false;
 
       $(document).ready(function(){
         getData();
+        $(".ui-btn-right").removeClass("ui-btn-right"); //fix style
+        $(".ui-btn-left").removeClass("ui-btn-left"); //fix style
       });
 
       function getData(offline){
@@ -195,8 +219,6 @@
 
           for(var i=0; i!=arr.length; i++){
             //array($cella["nome_insegnamento"], $cella["aula"], $cella["ora_inizio"], $cella["ora_fine"], $cella["docente"]);
-            //debug variabili
-            debugarr.push(arr[i]);
 
             if (arr[i][5] == nDay){
               //controllo se è di un altro Gruppo
@@ -226,7 +248,6 @@
 
         //controllo classi divise per cognomi
         checkSplittedClass(result);
-        debugJSON = result;
       }
 
 
@@ -300,7 +321,7 @@
             // Browser downloaded a new app cache.
             alert("Aggiornamento dell'app disponibile. Verrà ricaricata la pagina")
               window.location.reload(true);
-          }
+            }
         }, false);
 
       }, false);
@@ -360,11 +381,11 @@
     </script>
   </head>
   <body>
-
     <div data-role="header" data-position="fixed">
-      <a href="" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-left ui-icon-back" id="goback" onclick="goBack();">Indietro</a>
-    <h1>Univr OrariApp</h1>
-        <a onclick="window.location.href = 'settings.html';" data-ajax="false" class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-gear">&nbsp;</a>
+    <div style="height:35px; background-color:#e9e9e9" data-position="fixed">&nbsp</div>
+      <a href="" class="left-btn-left ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-left ui-icon-back" id="goback" onclick="goBack();">Indietro</a>
+    	<h1>Univr OrariApp</h1>
+        <a onclick="window.location.href = 'settings.html';" data-ajax="false" class="right-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-gear">&nbsp;</a>
     </div>
     <div data-role="collapsibleset" data-theme="a" data-inset="false">
 
